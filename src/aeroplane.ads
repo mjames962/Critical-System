@@ -14,7 +14,7 @@ package aeroplane is
    maximum_pitch : constant Integer := 20;
 
    --minumum pitch for landing
-   minimum_pitch_for_landing : constant Integer := 3;
+   pitch_for_landing : constant Integer := 3;
 
    type altitude_range is new Integer range 0 .. maximum_altitude;
 
@@ -24,11 +24,12 @@ package aeroplane is
    type pitch_range is new Integer range 0 .. maximum_pitch;
 
    type mid_flight_pitch_range is
-     new Integer range minimum_pitch_for_landing .. maximum_pitch;
+     new Integer range pitch_for_landing .. maximum_pitch;
 
    type landing_gear_status_type is (Activated, Not_Activated);
 
-   type flight_status_type is (Ascending, Descending, Landed);
+   type flight_status_type is
+     (Ascending, Descending, Landed, Fast_Descent_Warning);
 
    type system_status_type is record
       altitude            : altitude_range;
@@ -51,11 +52,27 @@ package aeroplane is
 
    procedure print_status;
 
-   function is_safe (status : system_status_type) return Boolean;
+   function is_safe (system_status : system_status_type) return Boolean is
+     ((if Integer (system_status.altitude) >= minimum_altitude_before_landing
+       then system_status.landing_gear_status = Not_Activated) and
+      (if Integer (system_status.altitude) < minimum_altitude_before_landing
+       then system_status.landing_gear_status = Activated) and
+      (if Integer (system_status.pitch) > pitch_for_landing then
+         system_status.flight_status = Ascending) and
+      (if Integer (system_status.pitch) = pitch_for_landing then
+         system_status.flight_status = Descending) and
+      (if
+         Integer (system_status.pitch) < pitch_for_landing and
+         Integer (system_status.altitude) > 0
+       then system_status.flight_status = Fast_Descent_Warning) and
+      (if
+         Integer (system_status.pitch) < pitch_for_landing and
+         Integer (system_status.altitude) = 0
+       then system_status.flight_status = Landed));
 
-   --procedure monitor_landing_gear;
+   procedure monitor_landing_gear;
 
-   --procedure monitor_flight_status;
+   procedure monitor_flight_status;
 
    procedure init;
 

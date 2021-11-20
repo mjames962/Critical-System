@@ -61,6 +61,8 @@ package body aeroplane is
          return "Ascending";
       elsif (flight_status = Descending) then
          return "Descending";
+      elsif (flight_status = Fast_Descent_Warning) then
+         return "Fast_Descent_Warning";
       else
          return "Landed";
       end if;
@@ -69,25 +71,48 @@ package body aeroplane is
 
    procedure print_status is
    begin
-      AS_Put("Altitude = ");
-      AS_Put(Integer(system_status.altitude));
-      AS_Put_Line("");
-      AS_Put("Pitch = ");
-      AS_Put(Integer(system_status.pitch));
+      AS_Put ("Altitude = ");
+      AS_Put (Integer (system_status.altitude));
+      AS_Put_Line ("");
+      AS_Put ("Pitch = ");
+      AS_Put (Integer (system_status.pitch));
+      AS_Put_Line ("");
+      AS_Put ("Landing Gear = ");
+      AS_Put_Line
+        (landing_gear_status_to_string (system_status.landing_gear_status));
+      AS_Put ("Flight Status = ");
+      AS_Put_Line (flight_status_to_string (system_status.flight_status));
    end print_status;
 
-   function is_safe (status : system_status_type) return Boolean is
+
+   procedure monitor_landing_gear is
    begin
-      return True;
-   end is_safe;
 
-   --procedure monitor_landing_gear is
-   --begin
-   --end monitor_landing_gear;
+      if Integer (system_status.altitude) < minimum_altitude_before_landing
+      then
+         system_status.landing_gear_status := Activated;
+      else
+         system_status.landing_gear_status := Not_Activated;
+      end if;
 
-   --procedure monitor_flight_status is
-   --begin
-   --end monitor_flight_status;
+   end monitor_landing_gear;
+
+   procedure monitor_flight_status is
+   begin
+
+      if Integer (system_status.altitude) > 0 then
+         if Integer (system_status.pitch) > pitch_for_landing then
+            system_status.flight_status := Ascending;
+         elsif Integer (system_status.pitch) = pitch_for_landing then
+            system_status.flight_status := Descending;
+         else
+            system_status.flight_status := Fast_Descent_Warning;
+         end if;
+      else
+         system_status.flight_status := Landed;
+      end if;
+
+   end monitor_flight_status;
 
    procedure init is
    begin
