@@ -8,7 +8,10 @@ begin
    init;
 
    loop
-      pragma Loop_Invariant (is_safe (system_status));
+      pragma Loop_Invariant
+        (safe_landing_gear (system_status) and
+         safe_flight_status (system_status));
+
       read_altitude;
       read_pitch;
       monitor_landing_gear;

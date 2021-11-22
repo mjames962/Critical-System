@@ -82,8 +82,8 @@ package body aeroplane is
         (landing_gear_status_to_string (system_status.landing_gear_status));
       AS_Put ("Flight Status = ");
       AS_Put_Line (flight_status_to_string (system_status.flight_status));
+      AS_Put_Line ("");
    end print_status;
-
 
    procedure monitor_landing_gear is
    begin
@@ -101,14 +101,22 @@ package body aeroplane is
    begin
 
       if Integer (system_status.altitude) > 0 then
+
          if Integer (system_status.pitch) > pitch_for_landing then
             system_status.flight_status := Ascending;
-         elsif Integer (system_status.pitch) = pitch_for_landing then
+         end if;
+
+         if Integer (system_status.pitch) = pitch_for_landing then
             system_status.flight_status := Descending;
-         else
+         end if;
+
+         if Integer (system_status.pitch) < pitch_for_landing then
             system_status.flight_status := Fast_Descent_Warning;
          end if;
-      else
+
+      end if;
+
+      if Integer (system_status.altitude) = 0 then
          system_status.flight_status := Landed;
       end if;
 
