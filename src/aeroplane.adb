@@ -61,8 +61,8 @@ package body aeroplane is
          return "Ascending";
       elsif (flight_status = Descending) then
          return "Descending";
-      elsif (flight_status = Fast_Descent_Warning) then
-         return "Fast_Descent_Warning";
+      elsif (flight_status = Invalid_Flight_Angle) then
+         return "Invalid_Flight_Angle";
       else
          return "Landed";
       end if;
@@ -85,21 +85,18 @@ package body aeroplane is
       AS_Put_Line ("");
    end print_status;
 
-   procedure monitor_landing_gear is
+   procedure monitor_system is
    begin
 
-      if Integer (system_status.altitude) < minimum_altitude_before_landing
+      --monitoring landing gear
+      if Integer (system_status.altitude) >= minimum_altitude_before_landing
       then
-         system_status.landing_gear_status := Activated;
-      else
          system_status.landing_gear_status := Not_Activated;
+      else
+         system_status.landing_gear_status := Activated;
       end if;
 
-   end monitor_landing_gear;
-
-   procedure monitor_flight_status is
-   begin
-
+      --monitoring flight status
       if Integer (system_status.altitude) > 0 then
 
          if Integer (system_status.pitch) > pitch_for_landing then
@@ -111,16 +108,19 @@ package body aeroplane is
          end if;
 
          if Integer (system_status.pitch) < pitch_for_landing then
-            system_status.flight_status := Fast_Descent_Warning;
+            system_status.flight_status := Invalid_Flight_Angle;
          end if;
 
-      end if;
-
-      if Integer (system_status.altitude) = 0 then
+      elsif Integer (system_status.altitude) = 0 and
+        Integer (system_status.pitch) = 0
+      then
          system_status.flight_status := Landed;
+      else
+         system_status.flight_status := Invalid_Flight_Angle;
+
       end if;
 
-   end monitor_flight_status;
+   end monitor_system;
 
    procedure init is
    begin
